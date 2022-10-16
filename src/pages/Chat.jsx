@@ -3,7 +3,9 @@ import {CgMenuGridO} from "react-icons/cg"
 import {AiOutlineLogout, AiOutlineSetting} from "react-icons/ai"
 import moment from "moment";
 import {useNavigate} from "react-router-dom"
-
+import {db} from "../firebaseServices"
+import { collection, doc , getDoc, getDocs, setDoc } from "firebase/firestore"
+ 
 function ChatMenu(){
 
     const navigate = useNavigate()
@@ -45,12 +47,27 @@ export default function Chat(){
     const [signedUser,setSignedUser] = useState(JSON.parse(localStorage.getItem("boring_chat_user")))
     const [loading,setLoading] = useState(true)
 
+    // membaca data dari collection chat
+    const getChatCollection = async ()=>{
+        let arrayCol = []
+        let chatColRef = await collection(db, "chat")
+        let result = await getDocs(chatColRef)
+        result.forEach((e)=>{
+            arrayCol.push(e.data())
+        })
+        return arrayCol
+    }
+
     // conponent did mount
     useEffect(()=>{
         let user = localStorage.getItem("boring_chat_user")
         if(!user){
             return window.location.href = "/"
         }
+
+        getChatCollection().then(res => {
+            setMessage(res)
+        })
 
         setLoading(false)
     },[])
@@ -66,6 +83,7 @@ export default function Chat(){
         window.scrollTo(0, docH )
     }
 
+    // Handle message
     const handleMessage = (e)=>{
         e.preventDefault()
         let msg = e.target.message.value
@@ -76,12 +94,16 @@ export default function Chat(){
 
         let user = JSON.parse(localStorage.getItem("boring_chat_user"))
         e.target.message.value = ""
-        setMessage([...message, {
+
+        let chatRef = doc(db, "chat", Date.now() + signedUser.username)
+        setDoc(chatRef, {
             id : Date.now(),
             message : msg,
             createdAt : Date.now(),
             user : user
-        }])
+        }).then(res =>{
+            console.info(res)
+        })
 
         scrollToBottomMsg()
 
