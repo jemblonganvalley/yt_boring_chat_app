@@ -3,6 +3,8 @@ import {CgMenuGridO} from "react-icons/cg"
 import {AiOutlineLogout, AiOutlineSetting} from "react-icons/ai"
 import moment from "moment";
 import {useNavigate} from "react-router-dom"
+import {db} from "../firebaseServices"
+import { collection, doc, setDoc, getDocs } from "firebase/firestore"
 
 function ChatMenu(){
 
@@ -45,12 +47,28 @@ export default function Chat(){
     const [signedUser,setSignedUser] = useState(JSON.parse(localStorage.getItem("boring_chat_user")))
     const [loading,setLoading] = useState(true)
 
+    // firebase ref
+    const noteRef = doc(db, "chat" , Date.now() + signedUser.username)
+
+    // get data
+    const getChatData = async ()=>{
+        let chatRef = await collection(db, "/chat")
+        let result = await getDocs(chatRef)
+        return result
+    }
+
     // conponent did mount
     useEffect(()=>{
         let user = localStorage.getItem("boring_chat_user")
         if(!user){
             return window.location.href = "/"
         }
+
+        getChatData().then(res =>{
+            res.forEach((e)=>{
+                console.info(e.data())
+            })
+        })
 
         setLoading(false)
     },[])
@@ -82,6 +100,13 @@ export default function Chat(){
             createdAt : Date.now(),
             user : user
         }])
+
+        setDoc(noteRef, {
+            id : Date.now(),
+            message : msg,
+            user : signedUser,
+            createdAt : Date.now()
+        })
 
         scrollToBottomMsg()
 
