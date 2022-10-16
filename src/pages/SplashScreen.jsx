@@ -1,6 +1,21 @@
-import React from "react";
+import React, {useEffect} from "react";
+import {useNavigate} from "react-router-dom"
 
 export default function SplashScreen(){
+
+    const navigate = useNavigate()
+
+    // to login
+    const toLogin = ()=>{
+        navigate("/login")
+    }
+
+    useEffect(()=>{
+        let user = localStorage.getItem("boring_chat_user")
+        if(user){
+            return navigate("/chat")
+        }
+    },[])
 
     return (
         <main className="w-screen h-screen p-8 bg-gradient-to-t from-orange-700 to-orange-500 flex flex-col">
@@ -15,7 +30,9 @@ export default function SplashScreen(){
                 diseluruh dunia..
             </p>
 
-            <button className="w-full h-10 bg-black text-white mt-auto rounded-lg z-[100]">
+            <button className="w-full h-10 bg-black text-white mt-auto rounded-lg z-[100]"
+                onClick={toLogin}
+            >
                 Login Now
             </button>
 

@@ -1,9 +1,19 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect} from "react";
 import {AvatarContext} from "../context/AvatarContextProvider"
+import {useNavigate} from "react-router-dom"
 
 export default function Login(){
 
     const {avatar,setAvatar} = useContext(AvatarContext)
+    const navigate = useNavigate()
+
+    //clc
+    useEffect(()=>{
+        let user = localStorage.getItem("boring_chat_user")
+        if(user){
+            return navigate("/chat")
+        }
+    },[])
 
     // ganti avatar sesuai date
     const handleAvatar = ()=>{
