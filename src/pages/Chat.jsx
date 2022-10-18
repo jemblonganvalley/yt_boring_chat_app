@@ -4,7 +4,7 @@ import {AiOutlineLogout, AiOutlineSetting} from "react-icons/ai"
 import moment from "moment";
 import {useNavigate} from "react-router-dom"
 import {db} from "../firebaseServices"
-import { collection, doc , getDoc, getDocs, setDoc } from "firebase/firestore"
+import { collection, doc , getDocs, setDoc, onSnapshot } from "firebase/firestore"
  
 function ChatMenu(){
 
@@ -58,6 +58,16 @@ export default function Chat(){
         return arrayCol
     }
 
+    // trigger ketika ada update di chat collection
+    const chatTrigger = ()=>{
+        let chatRef = collection(db, "chat")
+        onSnapshot(chatRef, (rec)=>{
+           getChatCollection().then(res =>{
+            setMessage(res)
+           })
+        })
+    }
+
     // conponent did mount
     useEffect(()=>{
         let user = localStorage.getItem("boring_chat_user")
@@ -70,7 +80,13 @@ export default function Chat(){
         })
 
         setLoading(false)
-    },[])
+
+        // component did update
+        return ()=>{
+            chatTrigger()
+        }
+        
+    },[db])
 
     // toggle menu
     const toggleMenu = ()=>{
